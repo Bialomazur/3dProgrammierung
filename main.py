@@ -2,17 +2,7 @@ import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import time
-import threading
 import random
-
-
-
-""" constants """
-MOVING_SPEED = 0.1
-
-""" globals """
-score = 0
 
 vertices = (
     (1, -1, -1),
@@ -23,7 +13,7 @@ vertices = (
     (1, 1, 1),
     (-1, -1, 1),
     (-1, 1, 1)
-)
+    )
 
 edges = (
     (0,1),
@@ -38,21 +28,7 @@ edges = (
     (5,1),
     (5,4),
     (5,7)
-)
-
-colors = (
-    (10,1,1),
-    (1,0,1),
-    (1,1,1),
-    (0,1,0),
-    (1,1,1),
-    (0,1,1),
-    (1,0,0),
-    (0,1,0),
-    (1,1,0),
-    (1,1,0),
-    (0,0,1)
-)
+    )
 
 surfaces = (
     (0,1,2,3),
@@ -61,130 +37,141 @@ surfaces = (
     (4,5,1,0),
     (1,5,7,2),
     (4,0,3,6)
-)
-
-keys_pressed = {
-    "A":False,
-    "W":False,
-    "S":False,
-    "D":False
-}
+    )
 
 
-def Cube():
+colors = (
+    (1,0,0),
+    (0,1,0),
+    (0,0,1),
+    (0,1,0),
+    (1,1,1),
+    (0,1,1),
+    (1,0,0),
+    (0,1,0),
+    (0,0,1),
+    (1,0,0),
+    (1,1,1),
+    (0,1,1),
+    )
+
+def set_vertices(max_distance):
+    x_value_change = random.randrange(-10,10)
+    y_value_change = random.randrange(-10,10)
+    z_value_change = random.randrange(-1*max_distance,-20)
+    new_vertices = []
+    for vert in vertices:
+        new_vert = []
+
+        new_x = vert[0] + x_value_change
+        new_y = vert[1] + y_value_change
+        new_z = vert[2] + z_value_change
+
+        new_vert.append(new_x)
+        new_vert.append(new_y)
+        new_vert.append(new_z)
+
+        new_vertices.append(new_vert)
+
+    return new_vertices
+        
+    
+def Cube(vertices):
     glBegin(GL_QUADS)
+    
     for surface in surfaces:
         x = 0
+
         for vertex in surface:
-            x += 1
+            x+=1
             glColor3fv(colors[x])
             glVertex3fv(vertices[vertex])
+        
     glEnd()
-
+    
     glBegin(GL_LINES)
     for edge in edges:
         for vertex in edge:
             glVertex3fv(vertices[vertex])
     glEnd()
 
-def controls():
-    while True:
-        if keys_pressed["A"]:
-            glTranslatef(-0.5, 0.0, 0.0)
-            time.sleep(2)
-        elif keys_pressed["D"]:
-            glTranslatef(0.5, 0.0, 0.0)
-            time.sleep(2)
-        elif keys_pressed["W"]:
-            glTranslatef(0.0, 0.5, 0.0)
-            time.sleep(2)
-        elif keys_pressed["S"]:
-            glTranslatef(0.0, -0.5, 0.0)
-            time.sleep(2)
-
-
 
 def main():
-    global score
-
     pygame.init()
-    display = (800, 600)
+    display = (800,600)
     pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
-    gluPerspective(45, (display[0]/display[1]), 0.1, 50.0) 
-    glTranslatef(random.randrange(-10,10), 0.0, -25) 
- #   glRotate(1, 1, 1000, 1) 
 
-    object_passed = False
+    gluPerspective(45, (display[0]/display[1]), 0.1, 50.0)
 
-    
+    glTranslatef(random.randrange(-5,5),random.randrange(-5,5), -40)
 
-    while not object_passed:
+    x_move = 0
+    y_move = 0
 
-        if keys_pressed["A"]:
-            glTranslatef(-0.5, 0.0, 0.0)
-            time.sleep(0.1)
-        elif keys_pressed["D"]:
-            glTranslatef(0.5, 0.0, 0.0)
-            time.sleep(0.1)
-        elif keys_pressed["W"]:
-            glTranslatef(0.0, 0.5, 0.0)
-            time.sleep(0.1)
-        elif keys_pressed["S"]:
-            glTranslatef(0.0, -0.5, 0.0)
-            time.sleep(0.1)
+    max_distance = 100
 
+    cube_dict = {}
+
+    for x in range(50):
+        cube_dict[x] = set_vertices(max_distance)
+
+    #glRotatef(25, 2, 1, 0)
+
+    while True:
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    keys_pressed["A"] = True
-                elif event.key == pygame.K_RIGHT:
-                    keys_pressed["D"] = True
-                elif event.key == pygame.K_UP:
-                    keys_pressed["W"] = True
-                elif event.key == pygame.K_DOWN:
-                    keys_pressed["S"] = True
-            
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT:
-                    keys_pressed["A"] = False
-                elif event.key == pygame.K_RIGHT:
-                    keys_pressed["D"] = False
-                elif event.key == pygame.K_UP:
-                    keys_pressed["W"] = False
-                elif event.key == pygame.K_DOWN:
-                    keys_pressed["S"] = False
 
-            # elif event.type == pygame.MOUSEBUTTONDOWN:
-            #     if event.button == 4:
-            #         glTranslatef(0,0,1.0)
-            #     elif event.button == 5:
-            #         glTranslate(0,0,-1.0)        
-               
-    
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    x_move = 0.3
+                if event.key == pygame.K_RIGHT:
+                    x_move = -0.3
 
-        x = glGetDouble(GL_MODELVIEW_MATRIX)
+                if event.key == pygame.K_UP:
+                    y_move = -0.3
+                if event.key == pygame.K_DOWN:
+                    y_move = 0.3
+
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                    x_move = 0
+
+                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    y_move = 0
+
+##            if event.type == pygame.MOUSEBUTTONDOWN:
+##                if event.button == 4:
+##                    glTranslatef(0,0,1.0)
+##
+##                if event.button == 5:
+##                    glTranslatef(0,0,-1.0)
+                    
+                    
+
+        
+
+      
+
+        x = glGetDoublev(GL_MODELVIEW_MATRIX)       
         camera_x = x[3][0]
         camera_y = x[3][1]
-        camera_z = x[3][2] 
-
-        if camera_z <= 0:
-            score += 10
-            main()
-
-        if score <= 50:
-            glTranslatef(0,0,MOVING_SPEED + ((score+1)/100))
-        else:
-            glTranslatef(0,0,MOVING_SPEED + 0.8)
-       
+        camera_z = x[3][2]
+          
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        Cube()
+
+        glTranslatef(x_move,y_move,.50)
+
+
+        for each_cube in cube_dict:
+            Cube(cube_dict[each_cube])
+
+            
         pygame.display.flip()
         pygame.time.wait(10)
 
-
 main()
+pygame.quit()
+quit()
