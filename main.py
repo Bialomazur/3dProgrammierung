@@ -55,10 +55,16 @@ colors = (
     (0,1,1),
     )
 
-def set_vertices(max_distance):
-    x_value_change = random.randrange(-10,10)
-    y_value_change = random.randrange(-10,10)
-    z_value_change = random.randrange(-1*max_distance,-20)
+
+
+player_x = 1
+player_z = 50
+player_y = 1
+
+def set_vertices(max_distance, player_x, player_y, player_z):
+    x_value_change = random.randrange(player_x-15, player_x+15)
+    y_value_change = random.randrange(player_y-15, player_y+15)
+    z_value_change = random.randrange(-3*player_z,-1*player_z)
     new_vertices = []
     for vert in vertices:
         new_vert = []
@@ -97,6 +103,7 @@ def Cube(vertices):
 
 
 def main():
+    global player_x, player_y, player_z
     pygame.init()
     display = (800,600)
     pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
@@ -107,13 +114,15 @@ def main():
 
     x_move = 0
     y_move = 0
+    cube_amount = 100
 
-    max_distance = 100
+
+    max_distance = 500
 
     cube_dict = {}
 
-    for x in range(50):
-        cube_dict[x] = set_vertices(max_distance)
+    for x in range(cube_amount):
+        cube_dict[x] = set_vertices(max_distance, player_x, player_y, player_z)
 
     #glRotatef(25, 2, 1, 0)
 
@@ -142,23 +151,17 @@ def main():
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                     y_move = 0
 
-##            if event.type == pygame.MOUSEBUTTONDOWN:
-##                if event.button == 4:
-##                    glTranslatef(0,0,1.0)
-##
-##                if event.button == 5:
-##                    glTranslatef(0,0,-1.0)
-                    
-                    
 
-        
-
-      
-
+                
         x = glGetDoublev(GL_MODELVIEW_MATRIX)       
-        camera_x = x[3][0]
-        camera_y = x[3][1]
-        camera_z = x[3][2]
+        player_x = x[3][0]
+        player_y = x[3][1]
+        player_z = x[3][2]
+
+        # print("X: {}".format(player_x))
+        # print("Y: {}".format(player_y))
+        # print("Z: {}".format(player_z))
+
           
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
